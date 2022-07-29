@@ -1,18 +1,40 @@
-from flask import Flask, render_template
+from flask import Flask, Response, request
 import pymongo
+import json
 
 app = Flask(__name__)
 
 try:
-    mydb = pymongo.MongoClient("mongodb://localhost:27017/")
-    db = mydb["CrudFlask"]
-    print("Conectado")
+    mongo = pymongo.MongoClient("mongodb://localhost:27017/")
+    db = mongo.company
+    mongo.server_info()
 except:
-    print("Tente novamente")
+    print("ERROR -Cannot connect to DB")
 
-@app.route("/")
-def Initial():
-    return render_template("index.html")
+###############################################################
+
+@app.route("/users", methods=["POST"])
+def create_user():
+    try:
+        # user = {
+        #     'name': 'A',
+        #     'lastName': 'AB'
+        # }
+        user = {
+            "name": request.form["name"], 
+            "lastName": request.form["lastName"]
+        }
+        dbResponse = db.users.insert_one(user)
+        print(dbResponse)
+        return Response(
+            response=json.dumps({"message": "user created", "id": f"{dbResponse.inserted_id}"}),
+            status=200,
+            mimetype="application/json"
+        )
+    except Exception as ex:
+        return ex
+
+###############################################################
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run(port=80, debug=True)
