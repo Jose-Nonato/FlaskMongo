@@ -1,6 +1,7 @@
 from flask import Flask, Response, request
 import pymongo
 import json
+from bson.objectid import ObjectId
 
 app = Flask(__name__)
 
@@ -11,15 +12,31 @@ try:
 except:
     print("ERROR -Cannot connect to DB")
 
-###############################################################
+##############################Read Operation#################################
+
+@app.route("/users", methods=["GET"])
+def get_user():
+    try:
+        data = list(db.users.find())
+        for user in data:
+            user["_id"] = str(user["_id"])
+        return Response(
+            response=json.dumps(data),
+            status=500,
+            mimetype="application/json"
+        )
+    except Exception as ex:
+        return Response(
+            response=json.dumps({"message": "cannot read user"}),
+            status=500,
+            mimetype="application/json"
+        )
+
+##############################Create Operation################################
 
 @app.route("/users", methods=["POST"])
 def create_user():
     try:
-        # user = {
-        #     'name': 'A',
-        #     'lastName': 'AB'
-        # }
         user = {
             "name": request.form["name"], 
             "lastName": request.form["lastName"]
