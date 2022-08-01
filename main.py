@@ -15,6 +15,36 @@ except:
 
 ##############################Update Operation#################################
 
+@app.route("/users/<id>", methods=["DELETE"])
+def delete_user(id):
+    try:
+        dbResponse = db.users.delete_one(
+            {"_id": ObjectId(id)}
+        )
+        if dbResponse.deleted_count == 1:
+            return Response(
+                response=json.dumps({"message": "user deleted", "id": f"{id}"}),
+                status=200,
+                mimetype="application/json"
+            )
+        else:
+            return Response(
+                response=json.dumps({"message": "user not found", "id": f"{id}"}),
+                status=200,
+                mimetype="application/json"
+            )
+    except Exception as ex:
+        print("*"*10)
+        print(ex)
+        print("*"*10)
+        return Response(
+            response=json.dumps({"message": "sorry cannot delete user"}),
+            status=500,
+            mimetype="application/json"
+        )
+
+##############################Update Operation#################################
+
 @app.route("/users/<id>", methods=["PATCH"])
 def update_user(id):
     try:
