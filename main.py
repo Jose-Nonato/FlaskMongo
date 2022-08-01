@@ -1,3 +1,4 @@
+from this import d
 from flask import Flask, Response, request
 import pymongo
 import json
@@ -11,6 +12,37 @@ try:
     mongo.server_info()
 except:
     print("ERROR -Cannot connect to DB")
+
+##############################Update Operation#################################
+
+@app.route("/users/<id>", methods=["PATCH"])
+def update_user(id):
+    try:
+        dbResponse = db.users.update_one(
+            {"_id": ObjectId(id)},
+            {"$set": {"name": request.form["name"]}}
+        )
+        if dbResponse.modified_count == 1:
+            return Response(
+                response=json.dumps({"message": "user updated"}),
+                status=200,
+                mimetype="application/json"
+            )
+        else:
+            return Response(
+                response=json.dumps({"message": "nothing to update"}),
+                status=200,
+                mimetype="application/json"
+            )
+    except Exception as ex:
+        print("*"*10)
+        print(ex)
+        print("*"*10)
+        return Response(
+            response=json.dumps({"message": "sorry cannot update user"}),
+            status=500,
+            mimetype="application/json"
+        )
 
 ##############################Read Operation#################################
 
